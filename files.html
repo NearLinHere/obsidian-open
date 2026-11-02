@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>打開檔案</title>
+<style>
+  body { font-family: -apple-system, "PingFang TC", sans-serif; margin: 0; min-height: 100vh;
+         display: flex; flex-direction: column; align-items: center; justify-content: center;
+         gap: 20px; padding: 24px; box-sizing: border-box; background: #faf8f5; color: #333; }
+  #note { font-size: 15px; color: #777; word-break: break-all; text-align: center; }
+  #go { display: inline-block; padding: 14px 28px; border-radius: 12px; background: #1d72e8;
+        color: #fff; font-size: 18px; text-decoration: none; }
+</style>
+</head>
+<body>
+<div id="note">正在打開檔案…</div>
+<a id="go" href="#">用「檔案」打開</a>
+<script>
+// 轉址規則（唯一一條）：網址 # 後面＝iCloud Drive 根目錄起算的檔案／資料夾路徑
+// 開頭寫死在 iCloud Drive、每一段各自編碼、擋 .. → 只能開 iCloud Drive 裡的東西
+// shareddocuments:// 是 Apple 沒公開的格式，iOS 改版可能失效（2026-11-02 iPhone 實測可用）
+var ROOT = 'shareddocuments:///private/var/mobile/Library/Mobile%20Documents/com~apple~CloudDocs/';
+function openFile() {
+  var raw = location.hash.slice(1);
+  var path;
+  try { path = decodeURIComponent(raw); } catch (e) { path = raw; }
+  var parts = path.split('/').filter(function (s) { return s !== '' && s !== '.'; });
+  var note = document.getElementById('note');
+  var go = document.getElementById('go');
+  if (!parts.length || parts.indexOf('..') !== -1) {
+    note.textContent = parts.length ? '路徑不能含 ..' : '連結裡沒有檔案路徑';
+    go.style.display = 'none';
+    return;
+  }
+  var uri = ROOT + parts.map(encodeURIComponent).join('/');
+  go.href = uri;
+  go.style.display = '';
+  note.textContent = parts.join('/');
+  location.href = uri;
+}
+// 同一分頁換 # 不會重新載入，要自己聽
+window.addEventListener('hashchange', openFile);
+openFile();
+</script>
+</body>
+</html>
