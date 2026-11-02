@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>打開 Obsidian</title>
+<style>
+  body { font-family: -apple-system, "PingFang TC", sans-serif; margin: 0; min-height: 100vh;
+         display: flex; flex-direction: column; align-items: center; justify-content: center;
+         gap: 20px; padding: 24px; box-sizing: border-box; background: #faf8f5; color: #333; }
+  #note { font-size: 15px; color: #777; word-break: break-all; text-align: center; }
+  #go { display: inline-block; padding: 14px 28px; border-radius: 12px; background: #7c3aed;
+        color: #fff; font-size: 18px; text-decoration: none; }
+</style>
+</head>
+<body>
+<div id="note">正在打開 Obsidian…</div>
+<a id="go" href="#">打開 Obsidian</a>
+<script>
+// 轉址規則（唯一一條）：網址 # 後面＝vault 內的筆記路徑（可再接 #標題）
+// vault 寫死、路徑整段編碼成 file 參數 → 轉不到別的網站，也夾帶不了 append/prepend
+var VAULT = '筆記';
+function openNote() {
+  var raw = location.hash.slice(1);
+  var file;
+  try { file = decodeURIComponent(raw); } catch (e) { file = raw; }
+  var note = document.getElementById('note');
+  var go = document.getElementById('go');
+  if (!file) {
+    note.textContent = '連結裡沒有筆記路徑';
+    go.style.display = 'none';
+    return;
+  }
+  var uri = 'obsidian://open?vault=' + encodeURIComponent(VAULT) +
+            '&file=' + encodeURIComponent(file);
+  go.href = uri;
+  go.style.display = '';
+  note.textContent = file;
+  location.href = uri;
+}
+// 同一分頁換 # 不會重新載入，要自己聽
+window.addEventListener('hashchange', openNote);
+openNote();
+</script>
+</body>
+</html>
